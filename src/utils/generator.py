@@ -22,12 +22,23 @@ class DataGenerator:
         shuffle: bool = False,
         cache: bool = False,
     ) -> None:
-        assert split in ["train", "test"]
+        assert split in ["train", "test", "val"]
         # Retrieve the dataset
-        dataset, ds_info = tfds.load("fashion_mnist", split=split, with_info=True)
+        dataset, ds_info = tfds.load(
+            "fashion_mnist",
+            split="train" if split in ["train", "val"] else split,
+            with_info=True,
+        )
 
         # Extract the number of label classes
         self.num_classes = ds_info._features["label"].num_classes
+
+        # Implement 80:20 train-val split from original "train" split
+        total_size = dataset.cardinality().numpy()
+        if split == "train":
+            dataset = dataset.take(int(0.8 * total_size))
+        elif split == "val":
+            dataset = dataset.skip(int(0.8 * total_size))
 
         buffer_multiplier = 20 if split == "train" else 5
         if cache:
@@ -71,7 +82,10 @@ class DataGenerator:
 
 
 if __name__ == "__main__":
-    train_gen = DataGenerator("train", batch_size=2, shuffle=True)
+    train_gen = DataGenerator("train", batch_size=1, shuffle=True)
+    val_gen = DataGenerator("val", batch_size=1, shuffle=False)
+    print(len(train_gen))
+    print(len(val_gen))
     train_loader = train_gen()
     for item in train_loader.take(1):
         print(item)
