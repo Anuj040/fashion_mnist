@@ -1,4 +1,7 @@
 """Main module to define, compile and train the NN model"""
+import glob
+import os
+
 import tensorflow as tf
 import tensorflow.keras.layers as KL
 import tensorflow.keras.models as KM
@@ -12,6 +15,20 @@ class Mnist:
 
     def __init__(self) -> None:
         self.model = self.build()
+
+    def load_model(self, path: str) -> KM.Model:
+        """method to load the trained model
+
+        Args:
+            path (str): path to models directory
+
+        Returns:
+            KM.Model: trained model object
+        """
+        models = glob.glob(os.path.join(path, "*.h5"))
+        models = sorted(models)
+
+        return KM.load_model(models[-1])
 
     def build(self, num_classes: int = 10, name: str = "mnist") -> KM.Model:
         """Creates a classifier model object
@@ -88,7 +105,23 @@ class Mnist:
             ],
         )
 
+    def eval(self, models_path: str = "save_model") -> str:
+        """model evalation method
+
+        Args:
+            path (str): path to models directory
+
+        Returns:
+            str: model performance metrics
+        """
+
+        self.model = self.load_model(models_path)
+        test_loader = DataGenerator("test", batch_size=32, shuffle=False)
+        history = self.model.evaluate(test_loader(), verbose=0)
+        return f"test set evaluated with loss = {history[0]:.4f} and accuracy = {history[1]:.4f}"
+
 
 if __name__ == "__main__":
     model = Mnist()
-    model.train(cache=True)
+    # model.train(cache=True)
+    print(model.eval())
