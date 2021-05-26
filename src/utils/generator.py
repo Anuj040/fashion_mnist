@@ -47,19 +47,19 @@ class DataGenerator:
 
         self.dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
 
-    def map_fn(self, input: dict) -> Tuple[tf.Tensor, tf.Tensor]:
+    def map_fn(self, inputs: dict) -> Tuple[tf.Tensor, tf.Tensor]:
         """method to transform the dataset elements to model usable form
 
         Args:
-            input (dict): an element from the dataset
+            inputs (dict): an element from the dataset
 
         Returns:
             Tuple[tf.Tensor, tf.Tensor]: input/output tensor pair
         """
         # Get the image array
-        image = tf.cast(input["image"], tf.float32) / 255.0
+        image = tf.cast(inputs["image"], tf.float32) / 255.0
 
-        return image, tf.one_hot(input["label"], self.num_classes)
+        return image, tf.one_hot(inputs["label"], self.num_classes)
 
     def __call__(self, *args, **kwargs) -> tf.data.Dataset:
         # returns the Dataset object
