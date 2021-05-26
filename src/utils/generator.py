@@ -22,12 +22,23 @@ class DataGenerator:
         shuffle: bool = False,
         cache: bool = False,
     ) -> None:
-        assert split in ["train", "test"]
+        assert split in ["train", "test", "val"]
         # Retrieve the dataset
-        dataset, ds_info = tfds.load("fashion_mnist", split=split, with_info=True)
+        dataset, ds_info = tfds.load(
+            "fashion_mnist",
+            split="train" if split in ["train", "val"] else split,
+            with_info=True,
+        )
 
         # Extract the number of label classes
         self.num_classes = ds_info._features["label"].num_classes
+
+        # Implement 80:20 train-val split from original "train" split
+        total_size = dataset.cardinality().numpy()
+        if split == "train":
+            dataset = dataset.take(int(0.8 * total_size))
+        elif split == "val":
+            dataset = dataset.skip(int(0.8 * total_size))
 
         buffer_multiplier = 20 if split == "train" else 5
         if cache:
@@ -47,19 +58,19 @@ class DataGenerator:
 
         self.dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
 
-    def map_fn(self, input: dict) -> Tuple[tf.Tensor, tf.Tensor]:
+    def map_fn(self, inputs: dict) -> Tuple[tf.Tensor, tf.Tensor]:
         """method to transform the dataset elements to model usable form
 
         Args:
-            input (dict): an element from the dataset
+            inputs (dict): an element from the dataset
 
         Returns:
             Tuple[tf.Tensor, tf.Tensor]: input/output tensor pair
         """
         # Get the image array
-        image = tf.cast(input["image"], tf.float32) / 255.0
+        image = tf.cast(inputs["image"], tf.float32) / 255.0
 
-        return image, tf.one_hot(input["label"], self.num_classes)
+        return image, tf.one_hot(inputs["label"], self.num_classes)
 
     def __call__(self, *args, **kwargs) -> tf.data.Dataset:
         # returns the Dataset object
@@ -71,7 +82,10 @@ class DataGenerator:
 
 
 if __name__ == "__main__":
-    train_gen = DataGenerator("train", batch_size=2, shuffle=True)
+    train_gen = DataGenerator("train", batch_size=1, shuffle=True)
+    val_gen = DataGenerator("val", batch_size=1, shuffle=False)
+    print(len(train_gen))
+    print(len(val_gen))
     train_loader = train_gen()
     for item in train_loader.take(1):
         print(item)
