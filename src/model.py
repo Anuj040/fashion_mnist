@@ -2,6 +2,7 @@
 import tensorflow as tf
 import tensorflow.keras.layers as KL
 import tensorflow.keras.models as KM
+from tensorflow.keras.callbacks import ModelCheckpoint
 
 from utils.generator import DataGenerator
 
@@ -44,10 +45,12 @@ class Mnist:
         )
         self.model.compile(optimizer=optimizer, loss=loss, metrics=metric)
 
+    # pylint: disable = too-many-arguments
     def train(
         self,
         epochs: int = 10,
         train_batch_size: int = 32,
+        val_batch_size: int = 32,
         l_rate: float = 1e-3,
         cache: bool = False,
     ) -> None:
@@ -56,6 +59,7 @@ class Mnist:
         Args:
             epochs (int, optional): total number of training epochs. Defaults to 10.
             train_batch_size (int, optional): batchsize for train dataset. Defaults to 32.
+            val_batch_size (int, optional): batchsize for val dataset. Defaults to 32.
             l_rate (float, optional): learning rate for training. defaults to 1e-3
             cache (bool, optional): whether to store the train/val data in cache. defaults to False
         """
@@ -65,9 +69,26 @@ class Mnist:
         train_loader = DataGenerator(
             "train", batch_size=train_batch_size, shuffle=True, cache=cache
         )
-        self.model.fit(train_loader(), epochs=epochs, verbose=2, workers=8)
+        val_loader = DataGenerator(
+            "val", batch_size=val_batch_size, shuffle=False, cache=cache
+        )
+        self.model.fit(
+            train_loader(),
+            epochs=epochs,
+            validation_data=val_loader(),
+            verbose=2,
+            workers=8,
+            callbacks=[
+                ModelCheckpoint(
+                    "save_model/model_{val_accuracy:.4f}.h5",
+                    "val_accuracy",
+                    save_best_only=True,
+                    mode="max",
+                )
+            ],
+        )
 
 
 if __name__ == "__main__":
     model = Mnist()
-    model.train()
+    model.train(cache=True)
