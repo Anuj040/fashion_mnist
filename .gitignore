@@ -10,4 +10,8 @@ poetry.lock
 
 # Directories
 reports/
+save_model/
+
+# Binaries
+*__pycache__
 

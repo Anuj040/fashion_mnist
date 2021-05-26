@@ -1,2 +1,3 @@
 [Message Control]
-disable=E1120 # no-value-for-parameter
+disable=E1120, # no-value-for-parameter
+        E0611, # no-name-in-module
