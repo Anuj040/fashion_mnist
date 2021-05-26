@@ -1,0 +1,10 @@
+# pyenv
+.python-version
+.venv/
+
+# poetry 
+poetry.lock
+
+# VS Code
+*.code-workspace
+
