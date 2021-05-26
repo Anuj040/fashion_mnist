@@ -7,6 +7,8 @@ from utils.generator import DataGenerator
 
 
 class Mnist:
+    """Mnist fashion model class"""
+
     def __init__(self) -> None:
         self.model = self.build()
 
@@ -21,37 +23,21 @@ class Mnist:
             KM.Model: classifier model
         """
         input_tensor = KL.Input(shape=(28, 28, 1))
-        encoded = KL.Conv2D(
-            4,
-            3,
-            strides=(2, 2),
-            padding="same",
-            use_bias=False,
-            name=name + f"_conv_{1}",
-        )(input_tensor)
-        encoded = KL.Activation("relu")(KL.BatchNormalization()(encoded))
-        encoded = KL.Conv2D(
-            8,
-            3,
-            strides=(2, 2),
-            padding="same",
-            use_bias=False,
-            name=name + f"_conv_{2}",
-        )(encoded)
-        encoded = KL.Activation("relu")(KL.BatchNormalization()(encoded))
-        encoded = KL.GlobalAveragePooling2D()(encoded)
+
+        encoded = KL.Flatten()(input_tensor)
+        encoded = KL.Dense(128, activation="relu", name=name + "den_1")(encoded)
 
         # Probability vector
-        prob = KL.Dense(num_classes)(encoded)
+        prob = KL.Dense(num_classes, name=name + "den_2")(encoded)
 
         return KM.Model(input_tensor, prob, name=name)
 
-    def compile(self, lr: float = 1e-3) -> None:
+    def compile(self, l_rate: float = 1e-3) -> None:
         """method to compile the model object with optimizer, loss definitions and metrics
         Args:
-            lr (float, optional): learning rate for training. defaults to 1e-3
+            l_rate (float, optional): learning rate for training. defaults to 1e-3
         """
-        optimizer = tf.keras.optimizers.Adam(learning_rate=lr)
+        optimizer = tf.keras.optimizers.Adam(learning_rate=l_rate)
         metric = "accuracy"
         loss = tf.keras.losses.CategoricalCrossentropy(
             from_logits=True, label_smoothing=0.1
@@ -62,7 +48,7 @@ class Mnist:
         self,
         epochs: int = 10,
         train_batch_size: int = 32,
-        lr: float = 1e-3,
+        l_rate: float = 1e-3,
         cache: bool = False,
     ) -> None:
         """method to initiate model training
@@ -70,16 +56,16 @@ class Mnist:
         Args:
             epochs (int, optional): total number of training epochs. Defaults to 10.
             train_batch_size (int, optional): batchsize for train dataset. Defaults to 32.
-            lr (float, optional): learning rate for training. defaults to 1e-3
+            l_rate (float, optional): learning rate for training. defaults to 1e-3
             cache (bool, optional): whether to store the train/val data in cache. defaults to False
         """
 
-        self.compile(lr=lr)
+        self.compile(l_rate=l_rate)
 
         train_loader = DataGenerator(
             "train", batch_size=train_batch_size, shuffle=True, cache=cache
         )
-        self.model.fit(train_loader(), epochs=epochs, verbose=2)
+        self.model.fit(train_loader(), epochs=epochs, verbose=2, workers=8)
 
 
 if __name__ == "__main__":
