@@ -1,0 +1,19 @@
+<html>
+
+<head>
+    <title>Eval</title>
+</head>
+
+<body>
+    <h1>This is a portal for executing <i>fashion_mnist</i> model's evaluation</h1>
+    <h2>Click below to execute model evaluation</h2>
+    <form method=POST enctype=multipart/form-data action="{{ url_for('evaluate') }}">
+        <button type="submit" name="execute" value="Start evaluation"> execute </button>
+    </form>
+    <h2>Click below to go to the single image inference page</h2>
+    <form method=POST enctype=multipart/form-data action="{{ url_for('evaluate') }}">
+        <button type="submit" name="infer" value="Redirect to Infer page"> infer </button>
+    </form>
+</body>
+
+</html>

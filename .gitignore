@@ -14,4 +14,4 @@ save_model/
 
 # Binaries
 *__pycache__
-
+*DS_Store

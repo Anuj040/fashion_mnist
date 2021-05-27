@@ -1,6 +1,7 @@
 """Main module to define, compile and train the NN model"""
 import glob
 import os
+import sys
 
 import numpy as np
 import tensorflow as tf
@@ -8,7 +9,9 @@ import tensorflow.keras.layers as KL
 import tensorflow.keras.models as KM
 from tensorflow.keras.callbacks import ModelCheckpoint
 
-from utils.generator import DataGenerator
+sys.path.append("./")
+# pylint: disable = wrong-import-position
+from src.utils.generator import DataGenerator
 
 
 class Mnist:
@@ -165,6 +168,8 @@ if __name__ == "__main__":
 
     model.load_model("save_model")
     # print(model.eval())
-    img = tf.keras.preprocessing.image.load_img("test.png", color_mode="grayscale")
+    img = tf.keras.preprocessing.image.load_img(
+        "test_samples/test.png", color_mode="grayscale"
+    )
     img = tf.keras.preprocessing.image.img_to_array(img, dtype=float) / 255.0
     print(model.infer(img))
