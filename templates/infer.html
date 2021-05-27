@@ -1,0 +1,20 @@
+<html>
+
+<head>
+    <title>Infer</title>
+</head>
+
+<body>
+    <h1>This is a portal for single image inference on <i>fashion_mnist</i> model</h1>
+    <h2>Please provide an image for inference</h2>
+    <form method=POST enctype=multipart/form-data action="{{ url_for('infer') }}">
+        <input type=file name=photo>
+        <input type="submit">
+    </form>
+    <h2>Click below to go to the model evaluation page</h2>
+    <form method=POST enctype=multipart/form-data action="{{ url_for('infer') }}">
+        <button type="submit" name="eval" value="Redirect to eval"> eval </button>
+    </form>
+</body>
+
+</html>
