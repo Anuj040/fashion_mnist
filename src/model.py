@@ -2,6 +2,7 @@
 import glob
 import os
 
+import numpy as np
 import tensorflow as tf
 import tensorflow.keras.layers as KL
 import tensorflow.keras.models as KM
@@ -15,8 +16,20 @@ class Mnist:
 
     def __init__(self) -> None:
         self.model = self.build()
+        self.class_names = [
+            "T-shirt/top",
+            "Trouser",
+            "Pullover",
+            "Dress",
+            "Coat",
+            "Sandal",
+            "Shirt",
+            "Sneaker",
+            "Bag",
+            "Ankle boot",
+        ]
 
-    def load_model(self, path: str) -> KM.Model:
+    def load_model(self, path: str) -> None:
         """method to load the trained model
 
         Args:
@@ -28,7 +41,7 @@ class Mnist:
         models = glob.glob(os.path.join(path, "*.h5"))
         models = sorted(models)
 
-        return KM.load_model(models[-1])
+        self.model = KM.load_model(models[-1])
 
     def build(self, num_classes: int = 10, name: str = "mnist") -> KM.Model:
         """Creates a classifier model object
@@ -70,7 +83,7 @@ class Mnist:
         val_batch_size: int = 32,
         l_rate: float = 1e-3,
         cache: bool = False,
-    ) -> None:
+    ) -> dict:
         """method to initiate model training
 
         Args:
@@ -79,6 +92,9 @@ class Mnist:
             val_batch_size (int, optional): batchsize for val dataset. Defaults to 32.
             l_rate (float, optional): learning rate for training. defaults to 1e-3
             cache (bool, optional): whether to store the train/val data in cache. defaults to False
+
+        Returns:
+            dict: training history [loss, accuracy]
         """
 
         self.compile(l_rate=l_rate)
@@ -89,7 +105,7 @@ class Mnist:
         val_loader = DataGenerator(
             "val", batch_size=val_batch_size, shuffle=False, cache=cache
         )
-        self.model.fit(
+        history = self.model.fit(
             train_loader(),
             epochs=epochs,
             validation_data=val_loader(),
@@ -105,23 +121,50 @@ class Mnist:
             ],
         )
 
-    def eval(self, models_path: str = "save_model") -> str:
-        """model evalation method
+        return history.history
 
-        Args:
-            path (str): path to models directory
+    def eval(self) -> str:
+        """model evaluation method
 
         Returns:
-            str: model performance metrics
+            str: model evaluation metrics
+        """
+        test_loader = DataGenerator("test", batch_size=32, shuffle=False)
+        history = self.model.evaluate(test_loader(), verbose=0, workers=8)
+        return (
+            "=" * 60
+            + f"\nTest set evaluation: loss = {history[0]:.4f} and accuracy = {history[1]:.4f}.\n"
+            + "=" * 60
+        )
+
+    def infer(self, image: np.ndarray) -> str:
+        """model inference method
+
+        Args:
+            image (np.ndarray): image array
+
+        Returns:
+            str: prediction for the image
         """
 
-        self.model = self.load_model(models_path)
-        test_loader = DataGenerator("test", batch_size=32, shuffle=False)
-        history = self.model.evaluate(test_loader(), verbose=0)
-        return f"test set evaluated with loss = {history[0]:.4f} and accuracy = {history[1]:.4f}"
+        history = self.model(tf.expand_dims(image, axis=0), training=False)
+        label = tf.argmax(history, axis=-1).numpy()
+
+        category = self.class_names[label[0]]
+        return (
+            "=" * (34 + len(category))
+            + f"\nThis image belongs to '{category}' category.\n"
+            + "=" * (34 + len(category))
+        )
 
 
 if __name__ == "__main__":
     model = Mnist()
+
     # model.train(cache=True)
-    print(model.eval())
+
+    model.load_model("save_model")
+    # print(model.eval())
+    img = tf.keras.preprocessing.image.load_img("test.png", color_mode="grayscale")
+    img = tf.keras.preprocessing.image.img_to_array(img, dtype=float) / 255.0
+    print(model.infer(img))
