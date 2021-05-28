@@ -10,12 +10,12 @@ tensorflow = "^2.5.0"
 tensorflow-datasets = "^4.3.0"
 Flask = "^2.0.1"
 Flask-Reuploaded = "^1.1.0"
+Pillow = "^8.2.0"
 
 [tool.poetry.dev-dependencies]
 black = "^21.5b1"
 isort = "^5.8.0"
 pylint-fail-under = "^0.3.0"
-Pillow = "^8.2.0"
 
 
 [build-system]

@@ -1,0 +1,7 @@
+# Version defined
+tensorflow-datasets==4.3.0
+Flask==2.0.1
+Flask-Reuploaded==1.1.0
+
+# Version free
+Pillow

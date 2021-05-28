@@ -1,0 +1,16 @@
+*__pycache__
+.github
+.venv
+.vscode
+reports
+static
+.dockerignore
+.gitignore
+.pylintrc
+.python-version
+Dockerfile
+Makefile
+mnist.code-workspace
+poetry.lock
+poetry.toml
+pyproject.toml

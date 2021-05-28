@@ -11,6 +11,7 @@ poetry.lock
 # Directories
 reports/
 save_model/
+tensorflow_datasets/
 
 # Binaries
 *__pycache__
