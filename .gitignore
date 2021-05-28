@@ -16,3 +16,6 @@ tensorflow_datasets/
 # Binaries
 *__pycache__
 *DS_Store
+
+# Flask
+flask_session

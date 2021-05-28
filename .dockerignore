@@ -14,3 +14,4 @@ mnist.code-workspace
 poetry.lock
 poetry.toml
 pyproject.toml
+flask_session
