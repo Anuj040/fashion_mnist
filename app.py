@@ -1,13 +1,19 @@
 """module for flask api"""
 import os
 
+import numpy as np
 import tensorflow.keras as tfk
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request, session, url_for
 from flask_uploads import IMAGES, UploadSet, configure_uploads
 
+from flask_session import Session
 from src.model import Mnist
 
 app = Flask(__name__)
+SESSION_TYPE = "filesystem"
+app.config.from_object(__name__)
+Session(app)
+
 photos = UploadSet("photos", IMAGES)
 
 # path for saving uploaded images
@@ -75,5 +81,54 @@ def evaluate():
     return render_template("eval.html")
 
 
+@app.route("/train", methods=["GET", "POST"])
+def train():
+    """page for model training"""
+
+    # pylint: disable = no-else-return
+    if request.method == "POST":
+
+        # extract variable from the request
+        epochs = int(request.form.get("epochs"))
+        train_batch_size = int(request.form.get("train"))
+        l_rate = 1e-3 * float(request.form.get("lr"))
+
+        # commence training
+        session["history"] = model.train(
+            epochs=epochs,
+            train_batch_size=train_batch_size,
+            l_rate=l_rate,
+            cache=True,
+        )
+
+        return redirect(url_for("train_finish"))
+
+    # web page for train inputs
+    return render_template("train.html")
+
+
+@app.route("/train/finish", methods=["GET", "POST"])
+def train_finish():
+    """training finish page"""
+    history = session.get("history")
+    index = np.argmax(history["val_accuracy"])
+    val_accuracy = history["val_accuracy"][index]
+    val_loss = history["val_loss"][index]
+
+    # pylint: disable = no-else-return
+    if request.method == "POST":
+        # Redirects after training
+        if request.form.get("infer"):
+            return redirect(url_for("infer"))
+        elif request.form.get("eval"):
+            return redirect(url_for("evaluate"))
+
+    return render_template(
+        "train_finish.html",
+        val_loss=f"{val_loss:.4f}",
+        val_accuracy=f"{val_accuracy:.4f}",
+    )
+
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True)
+    app.run(host="0.0.0.0")

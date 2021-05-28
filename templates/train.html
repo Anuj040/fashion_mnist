@@ -1,0 +1,21 @@
+<html>
+
+<head>
+    <title>Train</title>
+</head>
+
+<body>
+    <h1>This is a portal for initiating training of <i>fashion_mnist</i> model</h1>
+    <h2>Please provide the number of training epochs, training batch size and learning rate</h2>
+    <form method=POST enctype=multipart/form-data action="{{ url_for('train') }}">
+        <label for="epochs">Epochs:</label>
+        <input type="number" id="epochs" name="epochs" min="10" max="50">
+        <label for="train batch size">batch:</label>
+        <input type="number" id="train" name="train" min="32" max="100">
+        <label for="learning rate">learning rate (multiples of 1e-3):</label>
+        <input type="number" id="lr" name="lr" min="1" max="10">
+        <input type="submit">
+    </form>
+</body>
+
+</html>

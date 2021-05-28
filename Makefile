@@ -50,4 +50,10 @@ test:
 build:
 	@poetry build
 
+## Docker
+docker_build:
+	@docker build -t mnist/api .
+docker_run:
+	@docker run -d -p 5000:5000 mnist/api 
+
 pre-commit: format lint 
