@@ -1,0 +1,25 @@
+<html>
+
+<head>
+    <title>train_finish</title>
+</head>
+
+<body>
+    <h1><i>fashion_mnist</i> model has finished training</h1>
+    <h3> validation loss = {{val_loss}}</h3>
+    <h3> validation accuracy = {{val_accuracy}}</h3>
+
+    <h2>Please pick one of the following options</h2>
+
+    <h3>Click below to go to the model evaluation page</h3>
+    <form method=POST enctype=multipart/form-data action="{{ url_for('train_finish') }}">
+        <button type="submit" name="eval" value="Redirect to eval"> eval </button>
+    </form>
+
+    <h3>Click below to go to the single image inference page</h3>
+    <form method=POST enctype=multipart/form-data action="{{ url_for('train_finish') }}">
+        <button type="submit" name="infer" value="Redirect to Infer page"> infer </button>
+    </form>
+</body>
+
+</html>
