@@ -6,10 +6,11 @@ import tensorflow.keras as tfk
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask_uploads import IMAGES, UploadSet, configure_uploads
 
-from flask_session import Session
 from src.model import Mnist
 
 app = Flask(__name__)
+from flask_session import Session
+
 SESSION_TYPE = "filesystem"
 app.config.from_object(__name__)
 Session(app)
